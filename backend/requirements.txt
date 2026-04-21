@@ -7,3 +7,4 @@ python-jose
 pymysql
 pydantic[email]
 email-validator
+pandas
