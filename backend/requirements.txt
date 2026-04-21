@@ -9,3 +9,4 @@ pydantic[email]
 email-validator
 pandas
 python-multipart
+pip install psycopg2-binary
