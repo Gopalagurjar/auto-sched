@@ -1,4 +1,7 @@
 fastapi
 uvicorn
-gunicorn
+sqlalchemy
 python-dotenv
+bcrypt
+python-jose
+pymysql
