@@ -1,16 +1,18 @@
 import os
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
-from dotenv import load_dotenv
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
-load_dotenv()
+# ✅ Supabase PostgreSQL URL (password encoded)
+DATABASE_URL = "postgresql+psycopg2://postgres:Gopala%4020102004@db.yvqggktfexvndiquotlx.supabase.co:5432/postgres"
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 
-engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 Base = declarative_base()
 
+# Dependency
 def get_db():
     db = SessionLocal()
     try:
