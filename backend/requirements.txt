@@ -5,3 +5,5 @@ python-dotenv
 bcrypt
 python-jose
 pymysql
+pydantic[email]
+email-validator
