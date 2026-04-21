@@ -8,3 +8,4 @@ pymysql
 pydantic[email]
 email-validator
 pandas
+python-multipart
