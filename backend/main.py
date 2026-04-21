@@ -1,25 +1,36 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import auth, courses, faculty, classrooms, groups, constraints, timetables
-from routers import analytics
-from routers import upload
-from database import engine, Base
 
-# Create database tables
-Base.metadata.create_all(bind=engine)
+from routers import (
+    auth, courses, faculty, classrooms,
+    groups, constraints, timetables,
+    analytics, upload
+)
+
+from database import engine, Base
 
 app = FastAPI(title="AutoSched API", version="1.0.0")
 
-# CORS – allow frontend origins
+# ✅ SAFE DB INIT (NO CRASH ON RENDER)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print("DB not ready:", e)
+
+# ✅ CORS (PRODUCTION READY)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://your-frontend-url"   # 👈 replace this after deploy
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers (password reset is now part of auth.router)
+# Routers
 app.include_router(auth.router)
 app.include_router(courses.router)
 app.include_router(faculty.router)
