@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 # ✅ Supabase PostgreSQL URL (SSL REQUIRED)
-DATABASE_URL = "postgresql+psycopg2://postgres:Gopala%4020102004@db.yvqggktfexvndiquotlx.supabase.co:5432/postgres?sslmode=require"
+ DATABASE_URL = "postgresql+psycopg2://postgres.yvqggktfexvndiquotlx:Gopala%4020102004@aws-1-ap-south-1.pooler.supabase.com:6543/postgres"
 
 engine = create_engine(
     DATABASE_URL,
