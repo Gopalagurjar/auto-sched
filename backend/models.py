@@ -11,11 +11,16 @@ class User(Base):
     username = Column(String(50), unique=True, index=True, nullable=False)
     email = Column(String(100), unique=True, index=True, nullable=False)
     hashed_password = Column(String(200), nullable=False)
-    role = Column(Enum('admin', 'faculty', 'student'), nullable=False)
+
+    # ✅ FIXED ENUM
+    role = Column(
+        Enum('admin', 'faculty', 'student', name="user_role_enum"),
+        nullable=False
+    )
+
     full_name = Column(String(100), nullable=False)
     student_group_id = Column(Integer, ForeignKey("student_groups.id", ondelete="SET NULL"), nullable=True)
 
-    # Relationships
     student_group = relationship("StudentGroup", back_populates="users")
     password_reset_tokens = relationship("PasswordResetToken", back_populates="user", cascade="all, delete-orphan")
 
@@ -31,7 +36,6 @@ class Faculty(Base):
     max_hours = Column(Integer, nullable=False)
     preferences = Column(JSON, nullable=True)
 
-    # Relationships
     courses = relationship("Course", back_populates="faculty", cascade="all, delete-orphan")
 
 
@@ -49,7 +53,6 @@ class Course(Base):
     faculty_id = Column(Integer, ForeignKey("faculty.id", ondelete="SET NULL"), nullable=True)
     duration = Column(Integer, default=1, nullable=False)
 
-    # Relationships
     faculty = relationship("Faculty", back_populates="courses")
 
 
@@ -72,7 +75,6 @@ class StudentGroup(Base):
     semester = Column(Integer, nullable=False)
     enrolled_courses = Column(JSON, nullable=True)
 
-    # Relationships
     users = relationship("User", back_populates="student_group")
 
 
@@ -80,7 +82,13 @@ class Constraint(Base):
     __tablename__ = "constraints"
 
     id = Column(Integer, primary_key=True, index=True)
-    type = Column(Enum('hard', 'soft'), nullable=False)
+
+    # ✅ FIXED ENUM
+    type = Column(
+        Enum('hard', 'soft', name="constraint_type_enum"),
+        nullable=False
+    )
+
     name = Column(String(100), nullable=False)
     description = Column(String(500), nullable=True)
     penalty_weight = Column(Float, default=1.0)
@@ -109,5 +117,4 @@ class PasswordResetToken(Base):
     token = Column(String(100), unique=True, index=True, nullable=False)
     expires_at = Column(DateTime, nullable=False)
 
-    # Relationships
     user = relationship("User", back_populates="password_reset_tokens", foreign_keys=[email])
