@@ -38,7 +38,9 @@ export default function Register() {
     }
     setLoading(true);
     try {
-      await axios.post("http://127.0.0.1:8000/auth/register", formData);
+    const API_URL = import.meta.env.VITE_API_URL || "https://auto-sched.onrender.com";
+
+await axios.post(`${API_URL}/auth/register`, formData);
       // Redirect to login after successful registration
       navigate("/login", { state: { message: "Registration successful! Please log in." } });
     } catch (err) {
