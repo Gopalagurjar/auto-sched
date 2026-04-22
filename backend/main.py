@@ -7,23 +7,15 @@ from routers import (
     analytics, upload
 )
 
-from database import engine, Base
-
 app = FastAPI(title="AutoSched API", version="1.0.0")
 
-# ✅ SAFE DB INIT (NO CRASH ON RENDER)
-try:
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print("DB not ready:", e)
-
-# ✅ CORS (PRODUCTION READY)
+# ✅ CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://your-frontend-url"   # 👈 replace this after deploy
+        "https://your-frontend-url"
     ],
     allow_credentials=True,
     allow_methods=["*"],
