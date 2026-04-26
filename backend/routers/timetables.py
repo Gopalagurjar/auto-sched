@@ -8,9 +8,8 @@ from algorithm import TimetableSolver, Course as AlgoCourse, Room as AlgoRoom, F
 from datetime import datetime
 import json
 
-# Default shift configuration (matches frontend period names, no lunch)
 DEFAULT_SHIFT_CONFIG = {
-    "name": "Timetable",  # Changed from "Default" to "Timetable"
+    "name": "Timetable",
     "periods": ['9:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00', '14:00-15:00', '15:00-16:00'],
 }
 
@@ -22,9 +21,8 @@ def generate_timetable(
     db: Session = Depends(auth.get_db),
     current_user = Depends(auth.require_admin)
 ):
-    # Use default shift configuration (no frontend selection)
     shift_config = DEFAULT_SHIFT_CONFIG
-    shift = "default"  # stored in DB
+    shift = "default"
 
     course_ids = request.course_ids
     db_courses = db.query(models.Course).filter(models.Course.id.in_(course_ids)).all()
@@ -45,7 +43,6 @@ def generate_timetable(
         if not fac:
             raise HTTPException(status_code=400, detail=f"Faculty not found for course {c.id}")
 
-        # Parse faculty preferences
         prefs = fac.preferences or {}
         faculty_prefs = {}
         if isinstance(prefs, dict):
@@ -58,10 +55,12 @@ def generate_timetable(
 
         faculties_dict[fac.id] = AlgoFaculty(id=fac.id, preferences=faculty_prefs)
 
-        # Find student groups that take this course
-        groups = db.query(models.StudentGroup).filter(
-            models.StudentGroup.enrolled_courses.contains(f'[{c.id}]')
-        ).all()
+        # ✅ Fix - Python mein filter karo JSONB LIKE issue se bachne ke liye
+        all_groups = db.query(models.StudentGroup).all()
+        groups = [
+            g for g in all_groups
+            if g.enrolled_courses and c.id in g.enrolled_courses
+        ]
         group_ids = [g.id for g in groups]
 
         duration = c.duration if c.duration else 1
@@ -75,18 +74,16 @@ def generate_timetable(
     algo_rooms = [AlgoRoom(id=r.id) for r in db_rooms]
     algo_faculties = list(faculties_dict.values())
 
-    # Debug prints (optional GA parameters are logged but not used yet)
     print("\n" + "="*60)
     print("GENERATE TIMETABLE REQUEST")
     print("="*60)
     print(f"Course IDs: {course_ids}")
-    print(f"GA Parameters (for future use): pop={request.population_size}, gen={request.generations}, mr={request.mutation_rate}, cr={request.crossover_rate}")
+    print(f"GA Parameters: pop={request.population_size}, gen={request.generations}, mr={request.mutation_rate}, cr={request.crossover_rate}")
     print(f"Algo courses: {[(c.id, c.duration, c.faculty_id, c.student_group_ids) for c in algo_courses]}")
     print(f"Algo rooms: {[r.id for r in algo_rooms]}")
     print(f"Algo faculties: {[f.id for f in algo_faculties]}")
     print("="*60)
 
-    # Run the solver (backtracking, ignores GA parameters for now)
     solver = TimetableSolver(algo_courses, algo_rooms, algo_faculties, days=5, shift_config=shift_config)
     success = solver.solve()
     if not success:
@@ -101,7 +98,6 @@ def generate_timetable(
     print(f"Fitness: {fitness}")
     print("="*60 + "\n")
 
-    # ✅ FIXED: Use a clean timetable name (no "Default" prefix)
     new_timetable = models.Timetable(
         name=f"Timetable - {datetime.now().strftime('%Y-%m-%d %H:%M')}",
         generation_date=datetime.now(),
@@ -118,7 +114,6 @@ def generate_timetable(
     return new_timetable
 
 
-# -------------------- OTHER ENDPOINTS (unchanged) --------------------
 @router.get("/", response_model=List[schemas.Timetable])
 def read_timetables(
     skip: int = 0,
@@ -128,6 +123,7 @@ def read_timetables(
 ):
     timetables = db.query(models.Timetable).order_by(models.Timetable.generation_date.desc()).offset(skip).limit(limit).all()
     return timetables
+
 
 @router.post("/{timetable_id}/publish", response_model=schemas.Timetable)
 def publish_timetable(
@@ -145,6 +141,7 @@ def publish_timetable(
     db.refresh(tt)
     return tt
 
+
 @router.delete("/{timetable_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_timetable(
     timetable_id: int,
@@ -157,6 +154,8 @@ def delete_timetable(
     db.delete(tt)
     db.commit()
     return None
+
+
 @router.get("/faculty/me", response_model=List[schemas.TimetableAssignment])
 def get_my_faculty_timetable(
     db: Session = Depends(auth.get_db),
@@ -171,7 +170,7 @@ def get_my_faculty_timetable(
 
     published = db.query(models.Timetable).filter(models.Timetable.is_published == True).order_by(models.Timetable.generation_date.desc()).first()
     if not published:
-        return []  # ✅ Return empty list, not 404
+        return []
 
     try:
         all_assignments = json.loads(published.timetable_data)
@@ -195,7 +194,7 @@ def get_my_student_timetable(
 
     published = db.query(models.Timetable).filter(models.Timetable.is_published == True).order_by(models.Timetable.generation_date.desc()).first()
     if not published:
-        return []  # ✅ Return empty list, not 404
+        return []
 
     try:
         all_assignments = json.loads(published.timetable_data)
