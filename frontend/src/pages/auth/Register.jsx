@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import api from "../api";
+import api from "../../api";
 import {
   EnvelopeIcon,
   LockClosedIcon,
@@ -38,7 +38,6 @@ export default function Register() {
     }
     setLoading(true);
     try {
-    const API_URL = import.meta.env.VITE_API_URL || "https://auto-sched.onrender.com";
 
      await api.post("/auth/register", formData);
       // Redirect to login after successful registration
