@@ -7,8 +7,7 @@ from pydantic import BaseModel
 import models
 import schemas
 
-# ✅ Correct imports
-from utils.security import (
+from auth import (
     get_password_hash,
     verify_password,
     create_access_token,
@@ -101,11 +100,9 @@ def forgot_password(
 ):
     user = db.query(models.User).filter(models.User.email == email).first()
 
-    # Always return same response (security)
     if not user:
         return {"message": "If email exists, reset link sent"}
 
-    # Delete old tokens
     db.query(models.PasswordResetToken).filter(
         models.PasswordResetToken.email == email
     ).delete()
