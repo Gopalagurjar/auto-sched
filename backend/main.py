@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from routers import (
     auth, courses, faculty, classrooms,
     groups, constraints, timetables,
@@ -9,19 +8,18 @@ from routers import (
 
 app = FastAPI(title="AutoSched API", version="1.0.0")
 
-# ✅ CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
-        "https://auto-sched-pi.vercel.app"
+        "https://auto-sched-pi.vercel.app",
+        "https://auto-sched-gopalagurjars-projects.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Routers
 app.include_router(auth.router)
 app.include_router(courses.router)
 app.include_router(faculty.router)
