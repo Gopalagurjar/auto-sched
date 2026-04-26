@@ -38,6 +38,7 @@ export default function Register() {
     }
     setLoading(true);
     try {
+      const API_URL = import.meta.env.VITE_API_URL || "https://auto-sched.onrender.com";
      await api.post("/auth/register", formData);
       // Redirect to login after successful registration
       navigate("/login", { state: { message: "Registration successful! Please log in." } });
