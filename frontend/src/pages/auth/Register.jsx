@@ -38,7 +38,6 @@ export default function Register() {
     }
     setLoading(true);
     try {
-
      await api.post("/auth/register", formData);
       // Redirect to login after successful registration
       navigate("/login", { state: { message: "Registration successful! Please log in." } });
