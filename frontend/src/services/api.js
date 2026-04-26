@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // ✅ ENV se URL lo (Vercel compatible)
-const API_URL = import.meta.env.VITE_API_URL || "https://auto-sched.onrender.com/";
+const API_URL = import.meta.env.VITE_API_URL || "https://auto-sched.onrender.com";
 
 const api = axios.create({
   baseURL: API_URL,
