@@ -10,12 +10,8 @@ app = FastAPI(title="AutoSched API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "https://auto-sched-pi.vercel.app",
-        "https://auto-sched-gopalagurjars-projects.vercel.app"
-    ],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
